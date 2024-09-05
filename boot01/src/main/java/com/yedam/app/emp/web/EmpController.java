@@ -38,16 +38,19 @@ public class EmpController {
 		// 1) 기능 수행 => Service
 		List<EmpVO> list = empService.empList();
 		// 2) 클라이언트에 전달할 데이터 담기
-		model.addAttribute("emps", list);
+		model.addAttribute("emps", list); //타임리프할 때는 얘를 항상 잘 찾아야 한다. 우리가 여는 파일에 데이터를 전달하기 위한 메서드. (emps<- 이걸로 호출을 한다.)
 		return "emp/list"; // 3) 데이터를 출력할 페이지 결정
+		// prefix + return + suffix => 실제 경로를 생성해준다/ViewResolver
+		// classpath:/templates/emp/list.html => 이렇게 완성이 되어야 한다.
 	}
 	// 단건조회 : Get => QueryString(커맨드 객체 or @RequestParam)
-	@GetMapping("empInfo")
+	@GetMapping("empInfo") //empInfo?employeeId=value
 	public String empInfo(EmpVO empVO, Model model) {
 		EmpVO findVO = empService.empInfo(empVO);
 		model.addAttribute("emp", findVO);
 		// HttpServletRequest.setAttribute();
 		return "emp/info";
+		// classpath(곧 resources):/templates/emp/info.html => 실제경로
 	}// end of empInfo
 	
 	// 등록 - 페이지 : Get / **페이지는 post 방식으로 열 수 없다.
@@ -66,7 +69,7 @@ public class EmpController {
 		
 		if(eid > -1) {
 			// 정상적으로 등록된 경우
-			url = "redirect:empInfo?emplyeeId="+eid;
+			url = "redirect:empInfo?employeeId="+eid;
 			// redirect: 가 가능한 경우는 GetMapping 경우밖에 없다
 		}else {
 			// 등록되지 않은 경우
@@ -77,7 +80,7 @@ public class EmpController {
 	
 	
 	// 수정 - 페이지 : Get, 조건이 필요 <=> 사실상 단건조회와 같다.
-	@GetMapping("empUpdate")
+	@GetMapping("empUpdate") // empUpdate?employeeId=value
 	public String empUpdateForm(EmpVO empVO, Model model) {
 		EmpVO findVO = empService.empInfo(empVO);
 		model.addAttribute("emp", findVO);
@@ -85,7 +88,7 @@ public class EmpController {
 	}// end of empInfo
 	
 	// 수정 - 처리 : Post, AJAX => QueryString
-	@PostMapping("empUpdate")
+	//@PostMapping("empUpdate")
 	@ResponseBody // AJAX 반환하는 리턴타입에 대해 예외상황이 발생했다는 의미 , 응답이기 때문에 return 전에 해야 함
 	public Map<String, Object>
 		empUpdateAJAXQueryString(EmpVO empVO) {
@@ -93,7 +96,7 @@ public class EmpController {
 	}// end of empUpdateAJAXQueryString
 	
 	// 수정 - 처리 : AJAX => JSON (@RequestBody) // 위아래 같아서 하나는 주석처리 해야 오류 해결
-	//@PostMapping("empUpdate")
+	@PostMapping("empUpdate")
 	@ResponseBody // AJAX
 	public Map<String, Object>
 		empUpdateAJAXJSON(@RequestBody EmpVO empVO) {
