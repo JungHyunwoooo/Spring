@@ -48,7 +48,7 @@ public class SpringSecurityConfig {
 			.authorizeHttpRequests(authrize 
 				-> authrize
 				.requestMatchers("/", "/all").permitAll() //모든 사람이 다 사용하게끔 허용
-				.requestMatchers("/user/**").hasRole("USER")//특정 권한을 가지고 있을 때 강제로 실행  // 실행 방향은 위에서 아래 순서로 확인됨
+				.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")//특정 권한을 가지고 있을 때 강제로 실행  // 실행 방향은 위에서 아래 순서로 확인됨
 				.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
 				.anyRequest().authenticated() // 최소한 인증은 받아야 한다라는 의미
 			)
