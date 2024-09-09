@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>AJAX</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+</head>
+<body>
+	<div>
+		<input type="file" name="uploadFiles" multiple>
+		<button class="uploadBtn">upload</button>
+	</div>
+	<script>
+		$('.uploadBtn').on('click', function(event){
+			let formData = new FormData();
+			// 유사) jQuery.serializeArray();
+			// 1) <from/>태그 내부의 입력태그 정보를 한번에 받음
+			// 2) AJAX를 이용하여 'Content-type:multipart/form-data'를 보내는 경우
+			
+			let input = $(event.currentTarget).prev()[0];
+			let fileList = input.files; 
+			
+			for(let file of fileList){
+				formData.append("uploadFiles", file);
+			}
+			
+			console.log(formData.get("uploadFiles"));
+			
+			fetch('uploadsAjax', {
+				method : 'post',
+				/* application/json
+				headers : {
+					'content-type' : 'application/json'
+				},
+				body : JSON.stringify({})
+				*/
+				body : formData 
+				/*
+				application/x-www-form-urlencoded : URLURLSearchParams
+				multipart/form-data : FormData
+				*/
+			})
+			.then(res => res.json())
+			.then(result => {
+				console.log(result);
+			})
+			.catch(err => console.log(err));
+			
+			$.ajax('uploadsAjax',{
+				type : 'post',				
+				data : formData,     // data 속성의 값(객체 타입)을
+				processData : false, // QueryString으로 변환하는 설정
+				contentType : false  // 기본 contentType을 사용하지 않겠다고 설정
+			})
+			.done(result => {
+				for (let image of result){
+					let imgTag = `<img src='/imgs/${image}' style="width : 100%;">`;
+					$('div').append(imgTag);
+				}
+			})
+			.fail(err => console.log(err));
+		});
+		
+	</script>
+</body>
+</html>
