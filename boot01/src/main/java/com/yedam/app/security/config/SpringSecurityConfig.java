@@ -19,25 +19,22 @@ public class SpringSecurityConfig {
 		return new BCryptPasswordEncoder();
 	}
 	
-	@Bean // 메모리상 인증정보 등록 => 테스트 전용
-	InMemoryUserDetailsManager inMemoryUserDetailsService() {
-		UserDetails user = User.builder() //인증에 대해 처리하는 부분
-				.username("user1") //계정
-				.password(passwordEncoder().encode("1234")) //비밀번호 암호화
-				.roles("USER") // ROLE_USER // 권한, 앞에껀 내가 넣을게 뒤에껀 니가 넣어줘
-			  //.authorities("ROLE_USER") //권한
-				.build(); //생성
-		
-		UserDetails admin = User.builder() //인증에 대해 처리하는 부분
-				.username("admin1") //계정
-				.password(passwordEncoder().encode("1234")) //비밀번호 암호화
-			  //.roles("ADMIN") // ROLE_ADMIN // 권한, 앞에껀 내가 넣을게 뒤에껀 니가 넣어줘
-			    .authorities("ROLE_ADMIN") //권한
-				.build(); //생성
-		
-		return new InMemoryUserDetailsManager(user, admin);
-		
-	}
+	/*
+	 * @Bean // 메모리상 인증정보 등록 => 테스트 전용 InMemoryUserDetailsManager
+	 * inMemoryUserDetailsService() { UserDetails user = User.builder() //인증에 대해
+	 * 처리하는 부분 .username("user1") //계정 .password(passwordEncoder().encode("1234"))
+	 * //비밀번호 암호화 .roles("USER") // ROLE_USER // 권한, 앞에껀 내가 넣을게 뒤에껀 니가 넣어줘
+	 * //.authorities("ROLE_USER") //권한 .build(); //생성
+	 * 
+	 * UserDetails admin = User.builder() //인증에 대해 처리하는 부분 .username("admin1") //계정
+	 * .password(passwordEncoder().encode("1234")) //비밀번호 암호화 //.roles("ADMIN") //
+	 * ROLE_ADMIN // 권한, 앞에껀 내가 넣을게 뒤에껀 니가 넣어줘 .authorities("ROLE_ADMIN") //권한
+	 * .build(); //생성
+	 * 
+	 * return new InMemoryUserDetailsManager(user, admin);
+	 * 
+	 * }
+	 */
 	
 	//인증 및 인가
 	@Bean
@@ -47,15 +44,18 @@ public class SpringSecurityConfig {
 		http
 			.authorizeHttpRequests(authrize 
 				-> authrize
-				.requestMatchers("/", "/all").permitAll() //모든 사람이 다 사용하게끔 허용
-				.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")//특정 권한을 가지고 있을 때 강제로 실행  // 실행 방향은 위에서 아래 순서로 확인됨
-				.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
+				.requestMatchers("/", "/all").permitAll() //모든 사람이 다 사용하게끔 허용 // permitAll <-메인페이지
+				.requestMatchers("/user/**").hasAnyRole("USER", "ADMIN")//특정 권한을 가지고 있을 때 강제로 실행  // 실행 방향은 위에서 아래 순서로 확인됨//EX) 회의실
+				.requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN") // EX) 대표실(권한이 가장 강함)
 				.anyRequest().authenticated() // 최소한 인증은 받아야 한다라는 의미
 			)
 			.formLogin(formlogin -> formlogin
 					  .defaultSuccessUrl("/all"))
 			.logout(logout -> logout
-					  .logoutSuccessUrl("/all"));
+					  .logoutSuccessUrl("/all")
+					  .invalidateHttpSession(true));
+		
+		http.csrf(csrf -> csrf.disable()); // 얘를 안 쓸 거면 다른 식의 보안법을 사용해줘야 한다.
 		
 		return http.build();
 	}
